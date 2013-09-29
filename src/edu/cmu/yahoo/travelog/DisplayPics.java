@@ -35,6 +35,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.R.integer;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.TypedArray;
@@ -59,19 +60,24 @@ public class DisplayPics extends Activity {
 	private ArrayList<String> friendIDs = new ArrayList<String>();
 	private static String APP_ID = "385471371581009";
 	private static String APP_SECRET = "772e3a9987eca4f9d671309bf260a47e";
-	private static final String ACCESS_TOKEN = "CAACEdEose0cBAI4fkyNZADEnVo49meFFciFh4th6x0ZACRdwtBZBsreTr4k1opkthSAIG78lYv69vDoaAkEe0PMAYbCZCHlv5ZCKpCyVmHBkDjR2aBRNfGUXFcO4eqmpeh52DqAyqDyYl3U4IIEgcfDtRtOqNamumGZAS5Oulcq8xv8OK376mqNAEf7D0ZALEoglIuTID0qngZDZD";
+	private static final String ACCESS_TOKEN = "CAACEdEose0cBAMR881CMz9YXQ1wAm0mBACuPWcS1IE9YnQrU4HA4g3AXY6YDrl3wdDSYVGraC8nI8LecQIaZBbzrpJrnEAGPuz2KXYQt11d9EqXZCN48k0se5vtM9BJfzbOvzdmq9gF2hwMEwfHEGFNYBQkxlJV9GRneXZASggchKiTH5tvgpSA7UV5Vjfu9LfICUf10AZDZD";
+	private Context context;
 	private Activity displayPics;
 	private ArrayList<Bitmap> images = new ArrayList<Bitmap>();
+	public ProgressDialog pd;
+
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.display_pics);
+		context = getApplicationContext();
 		displayPics = this;
 
 		Intent intent = getIntent();
 		latitude = intent.getDoubleExtra("Latitude", 0.0);
 		longitude = intent.getDoubleExtra("Longitude", 0.0);
+		Log.d("LAT","Lat:" + latitude);
 
 		getPhotosFromFb();
 	}
@@ -116,8 +122,6 @@ public class DisplayPics extends Activity {
 			}
 		});
 		fbThread.start();
-
-
 	}
 
 	public String getAuthToken()
@@ -165,14 +169,14 @@ public class DisplayPics extends Activity {
 				{
 					try {
 
-						URI uri = new URI("https","graph.facebook.com", "/" + id + "/photos", "latitude=" + latitude + "&longitude="+ longitude + "&access_token=" + ACCESS_TOKEN, null);
+						URI uri = new URI("https","graph.facebook.com", "/" + id + "/photos", "latitude=" + latitude + "&longitude="+ longitude + "&access_token=" + ACCESS_TOKEN + "&limit=2", null);
 						HttpGet get = new HttpGet(uri.toASCIIString());
 						HttpResponse responseGet;
 						responseGet = client.execute(get);
 						HttpEntity responseEntity = responseGet.getEntity();
 						String response = EntityUtils.toString(responseEntity);
 						getPhotoURL(response);
-						Log.d("TestURL", fbPicURLs.toString());
+						Log.d("TestURL", response);						
 						images = new FetchBitmaps().execute(fbPicURLs).get();
 					} catch (ClientProtocolException e) {
 						// TODO Auto-generated catch block
@@ -205,6 +209,7 @@ public class DisplayPics extends Activity {
 
 		final int n = data.length();
 		for (int i = 0; i < n; ++i) {
+			//Log.d("Test", data.getJSONObject(i).getString("latitude"));
 			fbPicURLs.add(data.getJSONObject(i).getString("source"));
 		}
 	}
@@ -259,41 +264,45 @@ public class DisplayPics extends Activity {
 			final ImageView iv = new ImageView(ctx);
 			iv.setImageBitmap(images.get(arg0));
 			iv.setScaleType(ImageView.ScaleType.FIT_XY);
-			iv.setLayoutParams(new Gallery.LayoutParams(150,120));
-			//iv.setBackgroundResource(imageBackground);
+			iv.setLayoutParams(new Gallery.LayoutParams(200,170));
+			iv.setBackgroundResource(imageBackground);
 			return iv;
 		}
 
 	}
-	
+
 	public class FetchBitmaps extends AsyncTask<ArrayList<String>, Void, ArrayList<Bitmap>> {
 
+		
 		@Override
 		protected ArrayList<Bitmap> doInBackground(ArrayList<String>... params) {
 			ArrayList<Bitmap> images = new ArrayList<Bitmap>();
 			for ( String urlString: params[0])
 			{
-					URL url;
-					try {
-						url = new URL(urlString);
-						images.add(BitmapFactory.decodeStream(url.openConnection().getInputStream()));
-						
-					} catch (MalformedURLException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					} catch (IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
+				URL url;
+				try {
+					url = new URL(urlString);
+					images.add(BitmapFactory.decodeStream(url.openConnection().getInputStream()));
+
+				} catch (MalformedURLException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+
 			}
 			return images;
 
 		}
+
 		@Override
-	    protected void onPostExecute(ArrayList<Bitmap> result) {
-	      displayGallery();
-	    }
+		protected void onPostExecute(ArrayList<Bitmap> result) {
+			//pd.dismiss();
+			displayGallery();
+			super.onPostExecute(result);
+		}
 
 	}
 

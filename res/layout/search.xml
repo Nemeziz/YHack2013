@@ -15,7 +15,8 @@
         android:layout_alignParentLeft="false"
         android:layout_alignParentTop="false"
         android:layout_centerHorizontal="true"
-        android:layout_centerVertical="true" >
+        android:layout_centerVertical="true"
+        android:layout_marginTop="100dp" >
 
         <AutoCompleteTextView
             android:id="@+id/searchTextView"
@@ -24,6 +25,8 @@
             android:layout_weight="1"
             android:ems="10"
             android:hint="Where do you want to go?"
+            android:textColor="@color/ThemeBlue"
+            android:textColorHint="@color/ThemeBlue"
             android:width="340dp" />
 
         <Button
@@ -34,6 +37,7 @@
             android:layout_marginLeft="10dp"
             android:onClick="findPhotos"
             android:text="@string/find_btn"
+            android:textColor="@color/ThemeBlue"
             android:width="120dp" />
 
     </LinearLayout>

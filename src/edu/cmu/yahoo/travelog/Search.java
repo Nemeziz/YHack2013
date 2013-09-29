@@ -9,9 +9,14 @@ import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLSession;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.json.JSONStringer;
 
 import android.location.Address;
 import android.location.Geocoder;
@@ -39,7 +44,7 @@ public class Search extends Activity implements OnItemClickListener {
 	private static final String TYPE_AUTOCOMPLETE = "/autocomplete";
 	private static final String OUT_JSON = "/json";
 
-	private static final String API_KEY = "AIzaSyBmmUHiCEFeJGb6jh3syHcmVigHjHbiuwo";
+	private static final String API_KEY = "AIzaSyCSvYPnwVRmhbnxRU9F8fAJNrahKP6Ejis";
 	private Context context;
 	private double latitude;
 	private double longitude;
@@ -47,16 +52,18 @@ public class Search extends Activity implements OnItemClickListener {
 	private ArrayList<String> autocomplete(String input) {
 		ArrayList<String> resultList = null;
 
-		HttpURLConnection conn = null;
+		HttpsURLConnection conn = null;
 		StringBuilder jsonResults = new StringBuilder();
 		try {
 			StringBuilder sb = new StringBuilder(PLACES_API_BASE + TYPE_AUTOCOMPLETE + OUT_JSON);
 			sb.append("?sensor=false&key=" + API_KEY);
 			sb.append("&components=country:us");
 			sb.append("&input=" + URLEncoder.encode(input, "utf8"));
-
+			
+			HttpsURLConnection.setDefaultHostnameVerifier(new NullHostNameVerifier());
+			
 			URL url = new URL(sb.toString());
-			conn = (HttpURLConnection) url.openConnection();
+			conn = (HttpsURLConnection) url.openConnection();			
 			InputStreamReader in = new InputStreamReader(conn.getInputStream());
 
 			// Load the results into a StringBuilder
@@ -92,6 +99,15 @@ public class Search extends Activity implements OnItemClickListener {
 		}
 
 		return resultList;
+	}
+	
+	public class NullHostNameVerifier implements HostnameVerifier {
+
+		@Override
+		public boolean verify(String hostname, SSLSession session) {
+			Log.i("RestUtilImpl", "Approving certificate for " + hostname);
+			return true;
+		}
 	}
 	private class PlacesAutoCompleteAdapter extends ArrayAdapter<String> implements Filterable {
 		private ArrayList<String> resultList;
@@ -151,7 +167,8 @@ public class Search extends Activity implements OnItemClickListener {
 		searchPlace = (AutoCompleteTextView) findViewById(R.id.searchTextView);
 		searchPlace.setAdapter(new PlacesAutoCompleteAdapter(this, R.layout.list_item));
 
-		searchPlace.setOnItemClickListener(this);	
+		searchPlace.setOnItemClickListener(this);
+		
 	}
 
 	@Override

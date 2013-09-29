@@ -5,13 +5,22 @@
     android:layout_height="fill_parent"
     >
 
-<Gallery 
-	android:id="@+id/Gallery01" 
-	android:layout_width="fill_parent" 
-	android:layout_height="wrap_content"></Gallery>
-<ImageView 
-	android:id="@+id/ImageView01" 
-	android:layout_width="wrap_content" 
-	android:layout_height="wrap_content"></ImageView>
+<Gallery
+    android:id="@+id/Gallery01"
+    android:layout_width="fill_parent"
+    android:layout_height="wrap_content"
+    android:layout_margin="30dp"
+    android:spacing="20dip" >
+
+</Gallery>
+
+<ImageView
+    android:id="@+id/ImageView01"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:layout_marginTop="10dp" >
+
+</ImageView>
 </LinearLayout>
 

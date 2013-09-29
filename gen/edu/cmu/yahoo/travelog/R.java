@@ -151,6 +151,7 @@ containing a value of this type.
         public static final int title_text=0x7f010003;
     }
     public static final class color {
+        public static final int ThemeBlue=0x7f060007;
         public static final int com_facebook_blue=0x7f060002;
         public static final int com_facebook_loginview_text_color=0x7f060006;
         public static final int com_facebook_picker_search_bar_background=0x7f060000;
