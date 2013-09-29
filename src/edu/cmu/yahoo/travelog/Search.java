@@ -18,6 +18,7 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.util.Log;
 import android.view.Menu;
 import android.view.View;
@@ -40,6 +41,8 @@ public class Search extends Activity implements OnItemClickListener {
 
 	private static final String API_KEY = "AIzaSyBmmUHiCEFeJGb6jh3syHcmVigHjHbiuwo";
 	private Context context;
+	private double latitude;
+	private double longitude;
 
 	private ArrayList<String> autocomplete(String input) {
 		ArrayList<String> resultList = null;
@@ -175,11 +178,11 @@ public class Search extends Activity implements OnItemClickListener {
 						list = gc.getFromLocationName(str, 1);
 						Address address = list.get(0);
 
-						double lat = address.getLatitude();
-						double lng = address.getLongitude();
+						latitude = address.getLatitude();
+						longitude = address.getLongitude();
 						
-						Log.d(LOG_TAG,"Latitude:"+lat);
-						Log.d(LOG_TAG,"Longitude:"+lng);
+						Log.d(LOG_TAG,"Latitude:"+latitude);
+						Log.d(LOG_TAG,"Longitude:"+longitude);
 					} catch (IOException e) {
 						e.printStackTrace();
 					}									
@@ -191,7 +194,10 @@ public class Search extends Activity implements OnItemClickListener {
 	
 	public void findPhotos(View view)
 	{
-		
+		Intent intent = new Intent(context, DisplayPics.class);
+		intent.putExtra("Latitude",latitude);
+		intent.putExtra("Longitude",longitude);
+		startActivity(intent);
 	}
 }	
 
