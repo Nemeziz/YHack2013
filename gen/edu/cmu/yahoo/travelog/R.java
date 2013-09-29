@@ -219,7 +219,9 @@ containing a value of this type.
         public static final int ic_launcher=0x7f020020;
     }
     public static final class id {
-        public static final int action_settings=0x7f04001b;
+        public static final int Gallery01=0x7f040018;
+        public static final int ImageView01=0x7f040019;
+        public static final int action_settings=0x7f04001d;
         public static final int com_facebook_login_activity_progress_bar=0x7f040005;
         public static final int com_facebook_picker_activity_circle=0x7f040004;
         public static final int com_facebook_picker_checkbox=0x7f040007;
@@ -240,12 +242,12 @@ containing a value of this type.
         public static final int com_facebook_usersettingsfragment_login_button=0x7f040017;
         public static final int com_facebook_usersettingsfragment_logo_image=0x7f040015;
         public static final int com_facebook_usersettingsfragment_profile_name=0x7f040016;
-        public static final int findBtn=0x7f04001a;
+        public static final int findBtn=0x7f04001c;
         public static final int large=0x7f040002;
-        public static final int linearLayout1=0x7f040018;
+        public static final int linearLayout1=0x7f04001a;
         public static final int normal=0x7f040001;
         public static final int picker_subtitle=0x7f040012;
-        public static final int searchTextView=0x7f040019;
+        public static final int searchTextView=0x7f04001b;
         public static final int small=0x7f040000;
     }
     public static final class layout {
@@ -334,6 +336,25 @@ containing a value of this type.
         public static final int com_facebook_loginview_silver_style=0x7f080001;
     }
     public static final class styleable {
+        /** Attributes that can be used with a Gallery1.
+           <p>Includes the following attributes:</p>
+           <table>
+           <colgroup align="left" />
+           <colgroup align="left" />
+           <tr><th>Attribute</th><th>Description</th></tr>
+           <tr><td><code>{@link #Gallery1_android_galleryItemBackground android:galleryItemBackground}</code></td><td></td></tr>
+           </table>
+           @see #Gallery1_android_galleryItemBackground
+         */
+        public static final int[] Gallery1 = {
+            0x0101004c
+        };
+        /**
+          <p>This symbol is the offset where the {@link android.R.attr#galleryItemBackground}
+          attribute's value can be found in the {@link #Gallery1} array.
+          @attr name android:galleryItemBackground
+        */
+        public static final int Gallery1_android_galleryItemBackground = 0;
         /** Attributes that can be used with a com_facebook_friend_picker_fragment.
            <p>Includes the following attributes:</p>
            <table>

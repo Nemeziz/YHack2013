@@ -1,10 +1,14 @@
 package edu.cmu.yahoo.travelog;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
@@ -23,15 +27,30 @@ import com.facebook.android.AsyncFacebookRunner;
 import com.facebook.android.Facebook;
 import com.facebook.model.GraphObject;
 
+
 import android.location.Address;
 import android.location.Geocoder;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.R.integer;
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.content.res.TypedArray;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.Drawable;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.BaseAdapter;
+import android.widget.Gallery;
+import android.widget.ImageView;
+import android.widget.Toast;
+import android.widget.AdapterView.OnItemClickListener;
 
 public class DisplayPics extends Activity {
 	private double latitude;
@@ -40,13 +59,15 @@ public class DisplayPics extends Activity {
 	private ArrayList<String> friendIDs = new ArrayList<String>();
 	private static String APP_ID = "385471371581009";
 	private static String APP_SECRET = "772e3a9987eca4f9d671309bf260a47e";
-	private static final String ACCESS_TOKEN = "CAACEdEose0cBAFWZAAfXztusZBc0u9iuzKyo17ICEJ0FNhOgCYWkoSFR3fVlyuXuZAEa3KaTDJMsuCziUQ7ZCtnUUzM4mtsqT4kzYXUWEtMhoOiT8hsocGl79cXhFwbkqQTsCBmZCo8c6vZA5njkPyfkNKT6ZAoNefR2x8kT1S8qK7bXDJtZBZASbRMGpUwGqpmnitOaJGBYWUQZDZD";
-
+	private static final String ACCESS_TOKEN = "CAACEdEose0cBAI4fkyNZADEnVo49meFFciFh4th6x0ZACRdwtBZBsreTr4k1opkthSAIG78lYv69vDoaAkEe0PMAYbCZCHlv5ZCKpCyVmHBkDjR2aBRNfGUXFcO4eqmpeh52DqAyqDyYl3U4IIEgcfDtRtOqNamumGZAS5Oulcq8xv8OK376mqNAEf7D0ZALEoglIuTID0qngZDZD";
+	private Activity displayPics;
+	private ArrayList<Bitmap> images = new ArrayList<Bitmap>();
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.display_pics);
+		displayPics = this;
 
 		Intent intent = getIntent();
 		latitude = intent.getDoubleExtra("Latitude", 0.0);
@@ -71,7 +92,7 @@ public class DisplayPics extends Activity {
 				HttpClient client = new DefaultHttpClient();
 
 				try {
-					URI uri = new URI("https","graph.facebook.com","/me/friends","access_token=CAACEdEose0cBAFWZAAfXztusZBc0u9iuzKyo17ICEJ0FNhOgCYWkoSFR3fVlyuXuZAEa3KaTDJMsuCziUQ7ZCtnUUzM4mtsqT4kzYXUWEtMhoOiT8hsocGl79cXhFwbkqQTsCBmZCo8c6vZA5njkPyfkNKT6ZAoNefR2x8kT1S8qK7bXDJtZBZASbRMGpUwGqpmnitOaJGBYWUQZDZD", null);
+					URI uri = new URI("https","graph.facebook.com","/me/friends","access_token=" + ACCESS_TOKEN, null);
 					HttpGet get = new HttpGet(uri.toASCIIString());
 					HttpResponse responseGet;
 					responseGet = client.execute(get);
@@ -144,7 +165,7 @@ public class DisplayPics extends Activity {
 				{
 					try {
 
-						URI uri = new URI("https","graph.facebook.com", "/" + id + "/photos", "latitude=" + latitude + "&longitude="+ longitude + "&access_token=CAACEdEose0cBAFWZAAfXztusZBc0u9iuzKyo17ICEJ0FNhOgCYWkoSFR3fVlyuXuZAEa3KaTDJMsuCziUQ7ZCtnUUzM4mtsqT4kzYXUWEtMhoOiT8hsocGl79cXhFwbkqQTsCBmZCo8c6vZA5njkPyfkNKT6ZAoNefR2x8kT1S8qK7bXDJtZBZASbRMGpUwGqpmnitOaJGBYWUQZDZD", null);
+						URI uri = new URI("https","graph.facebook.com", "/" + id + "/photos", "latitude=" + latitude + "&longitude="+ longitude + "&access_token=" + ACCESS_TOKEN, null);
 						HttpGet get = new HttpGet(uri.toASCIIString());
 						HttpResponse responseGet;
 						responseGet = client.execute(get);
@@ -152,6 +173,7 @@ public class DisplayPics extends Activity {
 						String response = EntityUtils.toString(responseEntity);
 						getPhotoURL(response);
 						Log.d("TestURL", fbPicURLs.toString());
+						images = new FetchBitmaps().execute(fbPicURLs).get();
 					} catch (ClientProtocolException e) {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
@@ -163,13 +185,19 @@ public class DisplayPics extends Activity {
 						e.printStackTrace();
 					} catch (URISyntaxException e1) {
 						e1.printStackTrace();
+					} catch (InterruptedException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (ExecutionException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
 					}
 				}
 			}
 		});
 		fbThread.start();
 	}
-	
+
 	private void getPhotoURL(String JSONString) throws JSONException
 	{
 		final JSONObject obj = new JSONObject(JSONString);
@@ -180,4 +208,94 @@ public class DisplayPics extends Activity {
 			fbPicURLs.add(data.getJSONObject(i).getString("source"));
 		}
 	}
+
+	private void displayGallery()
+	{
+		Gallery ga = (Gallery)findViewById(R.id.Gallery01);
+		ga.setAdapter(new ImageAdapter(this));
+
+		final ImageView imageView = (ImageView)findViewById(R.id.ImageView01);
+		ga.setOnItemClickListener(new OnItemClickListener() {
+
+			@Override
+			public void onItemClick(AdapterView<?> arg0, View arg1, int arg2,
+					long arg3) {
+				imageView.setImageBitmap(images.get(arg2));
+			}
+		});
+	}
+	public class ImageAdapter extends BaseAdapter {
+
+		private Context ctx;
+		int imageBackground;
+
+		public ImageAdapter(Context c) {
+			ctx = c;
+			TypedArray ta = obtainStyledAttributes(R.styleable.Gallery1);
+			imageBackground = ta.getResourceId(R.styleable.Gallery1_android_galleryItemBackground, 1);
+			ta.recycle();
+		}
+
+		@Override
+		public int getCount() {
+
+			return fbPicURLs.size();
+		}
+
+		@Override
+		public Object getItem(int arg0) {
+
+			return arg0;
+		}
+
+		@Override
+		public long getItemId(int arg0) {
+
+			return arg0;
+		}
+
+		@Override
+		public View getView(int arg0, View arg1, ViewGroup arg2) {
+			final ImageView iv = new ImageView(ctx);
+			iv.setImageBitmap(images.get(arg0));
+			iv.setScaleType(ImageView.ScaleType.FIT_XY);
+			iv.setLayoutParams(new Gallery.LayoutParams(150,120));
+			//iv.setBackgroundResource(imageBackground);
+			return iv;
+		}
+
+	}
+	
+	public class FetchBitmaps extends AsyncTask<ArrayList<String>, Void, ArrayList<Bitmap>> {
+
+		@Override
+		protected ArrayList<Bitmap> doInBackground(ArrayList<String>... params) {
+			ArrayList<Bitmap> images = new ArrayList<Bitmap>();
+			for ( String urlString: params[0])
+			{
+					URL url;
+					try {
+						url = new URL(urlString);
+						images.add(BitmapFactory.decodeStream(url.openConnection().getInputStream()));
+						
+					} catch (MalformedURLException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+					
+			}
+			return images;
+
+		}
+		@Override
+	    protected void onPostExecute(ArrayList<Bitmap> result) {
+	      displayGallery();
+	    }
+
+	}
+
 }
+
